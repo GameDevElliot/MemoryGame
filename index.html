@@ -650,7 +650,16 @@
     fileInput.addEventListener('change', handleFile);
     generateBtn.addEventListener('click', generateRandomData);
     startBtn.addEventListener('click', startGame);
-    stopBtn.addEventListener('click', showSummary); 
+    
+    // Conditional Stop Logic
+    stopBtn.addEventListener('click', () => {
+      if (attempts === 0) {
+        backToSetup();
+      } else {
+        showSummary();
+      }
+    });
+
     listBtn.addEventListener('click', openModal);
     exportBtn.addEventListener('click', exportList);
     closeModal.addEventListener('click', closeModalFn);
@@ -734,9 +743,7 @@
         tempPairs.push({ street: name, number });
       }
 
-      // Sort the list by street name before committing
       originalPairs = [...tempPairs].sort((a, b) => a.street.localeCompare(b.street));
-      
       fileInput.value = '';
       statusEl.textContent = 'Generated 20 pairs.';
       enableControls();
@@ -926,7 +933,6 @@
       modalCols.style.display = 'none';
       modalFooter.classList.remove('visible');
       
-      // Prepare report data
       const report = [];
       for (const [street, stats] of Object.entries(streetStats)) {
         if (stats.wrongAnswers.length > 0) {
@@ -942,7 +948,6 @@
         }
       }
 
-      // Sort by street name with most wrong answers (Directive requirement)
       report.sort((a, b) => b.wrongCount - a.wrongCount);
 
       const table = document.createElement('table');
@@ -980,7 +985,6 @@
 
     function closeModalFn() { overlay.style.display = 'none'; }
 
-    // GAME LOGIC
     function generateSequence() {
       const indices = originalPairs.map((_, i) => i);
       if (gameMode === 'shuffle') {
@@ -995,7 +999,7 @@
       attempts = 0;
       correct = 0;
       totalCompleted = 0;
-      streetStats = {}; // Reset session stats
+      streetStats = {}; 
       
       generateSequence();
       
@@ -1026,7 +1030,6 @@
       summaryAccuracy.textContent = `${pct}%`;
       summaryCompleted.textContent = `${totalCompleted} Rounds`;
       
-      // Show "View Errors" if there were any attempts
       const hasErrors = Object.values(streetStats).some(s => s.wrongAnswers.length > 0);
       viewErrorsBtn.style.display = hasErrors ? 'block' : 'none';
 
@@ -1092,7 +1095,6 @@
       const pair = originalPairs[pairIdx];
       const correctNumber = pair.number;
 
-      // Track street-specific stats
       if (!streetStats[pair.street]) {
         streetStats[pair.street] = { attempts: 0, correct: 0, wrongAnswers: [] };
       }
